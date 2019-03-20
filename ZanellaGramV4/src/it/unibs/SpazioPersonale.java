@@ -8,14 +8,45 @@ public class SpazioPersonale implements Serializable {
 	private Vector<String> notifiche;
 	private Vector<Categoria> eventiCreati;
 	
+	private String nomignolo;
+	private FasciaDiEta eta;
+	private Vector<String> categoriePreferite=new Vector<String>();
 	
-	public SpazioPersonale() {
+	
+	public SpazioPersonale(String nomignolo) {
+		this.nomignolo=nomignolo;
 		this.eventiPrenotati = new Vector<Categoria>();
 		this.eventiCreati= new Vector<Categoria>();
 		this.notifiche = new Vector<String>();
 	}
 	
+	public void addCategoriaPreferita(String preferita) {
+		for(String s:categoriePreferite)
+			if(s.equals(preferita))
+				return;
+		categoriePreferite.add(preferita);
+	}
 	
+	public Vector<String> getCategoriePreferite() {
+		return categoriePreferite;
+	}
+
+
+	public void setCategoriePreferite(Vector<String> categoriePreferite) {
+		this.categoriePreferite = categoriePreferite;
+	}
+
+
+	public String getNomignolo() {
+		return nomignolo;
+	}
+
+
+	public void setEta(FasciaDiEta eta) {
+		this.eta = eta;
+	}
+
+
 	/**
 	 * @param evento da aggiungere
 	 */
@@ -122,9 +153,9 @@ public class SpazioPersonale implements Serializable {
 
 	public boolean isPartecipante(Categoria evento) {
 		for(Categoria c1: eventiPrenotati)
-			if(evento.equals(c1)) return true;
+			if(evento.toString().equals(c1.toString())) return true;
 		for(Categoria c2: eventiCreati)
-			if(evento.equals(c2)) return true;
+			if(evento.toString().equals(c2.toString())) return true;
 		return false;
 	}
 }

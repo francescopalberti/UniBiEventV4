@@ -41,7 +41,8 @@ public class Categoria implements Serializable {
 		campiBase = _campiBase;
 		nome=_nome;
 		descrizione=_descrizione;
-		partecipantiAttuali=1;
+		partecipantiAttuali=0;
+		listaPartecipanti= new Vector<SpazioPersonale>();
 		chiuso=false;
 		fallito=false;
 		concluso=false;

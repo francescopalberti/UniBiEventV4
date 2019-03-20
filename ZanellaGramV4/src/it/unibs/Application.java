@@ -8,8 +8,8 @@ import java.util.Vector;
 
 public class Application {
 	
-	public static String pathProfilo = "C:\\Users\\zenry\\git\\ZanellaGramV3\\ZanellaGramV3\\data\\profilo.dat";
-	public static String pathPartite = "C:\\Users\\zenry\\git\\ZanellaGramV3\\ZanellaGramV3\\data\\partite.dat";
+	public static String pathProfili = "C:\\Users\\franc\\git\\ZanellaGramV4\\ZanellaGramV4\\data\\profili.dat";
+	public static String pathPartite = "C:\\Users\\franc\\git\\ZanellaGramV4\\ZanellaGramV4\\data\\partite.dat";
 	
 	private static final int NUMERO_CAMPI=16;
 	
@@ -32,14 +32,17 @@ public class Application {
 	private static final int GENERE=14;
 	private static final int FASCIA_DI_ETA=15;
 	
-	private String[] categorie = {"Partite di calcio"};
+	private String[] categorie = {"Partita di calcio"};
 	private Data dataOdierna;
 	private Ora oraAttuale;
 	private SpazioPersonale mioProfilo;
 	private String titoloMain = "HOME";
+	private String titoloLogin = "LOGIN/ACCEDI";
 	private Vector<PartitaDiCalcio> listaPartite;
+	private Vector<SpazioPersonale> profili;
 	private String[] vociMain = {"Esci e salva","Vedi eventi", "Crea evento", "Vedi profilo"};
 	private String[] vociSpazioPersonale = {"Esci","Vedi eventi che ho creato","Vedi eventi a cui sono iscritto","Vedi notifiche"};
+	private String[] vociLogin = {"Accedi","Registrati"};
 	
 	private Campo[] campi;
 	
@@ -48,6 +51,7 @@ public class Application {
 		this.dataOdierna=dataOdierna;
 		this.oraAttuale=oraAttuale;
 	}
+	
 
 	@SuppressWarnings("unchecked")
 	private void initObjects() throws ClassNotFoundException, IOException {
@@ -55,8 +59,8 @@ public class Application {
 		assegnaPartitaDiCalcio(campi);
 		
 		//caricamento oggetti
-		if(new File(pathProfilo).exists())mioProfilo=(SpazioPersonale)caricaOggetto(pathProfilo, SpazioPersonale.class);
-		else mioProfilo = new SpazioPersonale();
+		if(new File(pathProfili).exists())profili=(Vector<SpazioPersonale>)caricaOggetto(pathProfili, SpazioPersonale.class);
+		else profili = new Vector<SpazioPersonale>();
 		
 		if(new File(pathPartite).exists())listaPartite=(Vector<PartitaDiCalcio>)caricaOggetto(pathPartite, PartitaDiCalcio.class);
 		else listaPartite = new Vector<PartitaDiCalcio>();
@@ -74,15 +78,88 @@ public class Application {
 			objectIn.close();
 		}
 		else if(c==SpazioPersonale.class){
-			result = (SpazioPersonale) objectIn.readObject();
+			result = (Vector<SpazioPersonale>) objectIn.readObject();
 			objectIn.close();
 		}
 		return result;
 	}
 	
+	public void log() {
+		boolean fine=false;
+		while(!fine) {
+			int i = Utility.scegli(titoloLogin,vociLogin,"Seleziona una voce",2);
+			switch(i) {
+				case 0:
+					fine=accedi();
+					break;
+				case 1:
+					registrati();
+					fine=true;
+					break;
+				default: 
+					System.out.println("Inserimento erraro!");
+					break;
+			}
+		}
+	}
 	
+	public boolean accedi() {
+	
+		String nick=Utility.leggiStringa("Inserisci il nomignolo per accedere ");
+		for(SpazioPersonale p:profili)
+			if(p.getNomignolo().equals(nick)) {
+				mioProfilo=p;
+				return true;
+			}
+		System.out.println("Credenziali errate!");
+		return false;
+	}
+	
+	public void registrati() {
+		System.out.println("REGISTRAZIONE");
+		boolean fine=false;
+		do {
+			String nick=Utility.leggiStringa("Nomignolo*");
+			if(nick=="") System.out.println("Il nomignolo è obbligatorio!");
+			else {
+				if(controlloNomignolo(nick)) {
+					mioProfilo=new SpazioPersonale(nick);
+					profili.add(mioProfilo);
+					infoAggiuntive();
+					fine=true;
+				} else {
+					System.out.println("Nomignolo già esistente!");
+				}
+			}
+		}while(!fine);
+	}
+	
+	public boolean controlloNomignolo(String nick) {
+		if(profili.size()==0)return true;
+		for(SpazioPersonale p:profili)
+			if(nick.equals(p.getNomignolo()))return false;
+		return true;
+	}
+	
+	public void infoAggiuntive() {
+	   FasciaDiEta fascia = new FasciaDiEta(Utility.leggiIntero("\nEtà min"), Utility.leggiIntero("Età max"));
+	   mioProfilo.setEta(fascia);
+	   stampaCategorie();
+	   boolean fine;
+	   int scelta;
+	   do {
+		   scelta = Utility.leggiIntero("Seleziona categoria d'interesse (0 per terminare)");
+		   if(scelta>categorie.length) System.out.println("Scelta non valida!!");
+		   else if (scelta==0) return;
+		   else {
+				   String preferita = categorie[scelta-1];
+				   mioProfilo.addCategoriaPreferita(preferita);
+		   		}
+	   }while(scelta!=0);
+	}
 	
 	public void runApplication() throws IOException {
+		log();
 		controlloEventi();
 		boolean fine=false;
 		while(!fine)
@@ -253,7 +330,7 @@ public class Application {
 		
 			if(a==0) return;
 			else{
-				partecipaEvento(disponibili.get(a));
+				partecipaEvento(disponibili.get(a-1));
 			}	
 		
 	}
@@ -261,7 +338,7 @@ public class Application {
 	private void visualizzaSpazioPersonale() {
 		boolean fine=false;
 		do {
-			int i = Utility.scegli("SPAZIO PERSONALE",vociSpazioPersonale,"Seleziona una voce",4);
+			int i = Utility.scegli("SPAZIO PERSONALE DI --> "+mioProfilo.getNomignolo(),vociSpazioPersonale,"Seleziona una voce",4);
 			switch(i) {
 				case 0:fine=true;
 					break;
@@ -384,9 +461,9 @@ public class Application {
 		writerPartite.writeObject(listaPartite);
 		writerPartite.close();
 		
-		ObjectOutputStream writerProfilo=new ObjectOutputStream(new FileOutputStream(new File(pathProfilo)));
-		writerProfilo.writeObject(mioProfilo);
-		writerProfilo.close();
+		ObjectOutputStream writerProfili=new ObjectOutputStream(new FileOutputStream(new File(pathProfili)));
+		writerProfili.writeObject(profili);
+		writerProfili.close();
 	}
 
 		
