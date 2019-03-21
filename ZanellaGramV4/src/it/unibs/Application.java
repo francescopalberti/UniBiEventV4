@@ -301,7 +301,6 @@ public class Application {
 	}
 	
 	
-
 	public void stampaCategorie()
 	{
 		for (int i = 0; i < categorie.length; i++) {
@@ -320,11 +319,13 @@ public class Application {
 	
 	public void vediEventi(Vector<Categoria> disponibili)
 	{
-		for(int i=0; i<disponibili.size(); i++) { 
-			System.out.println(disponibili.get(i).getNome() + " " + (i+1));
-			System.out.println(disponibili.get(i).getDescrizioneCampi());
+		if(disponibili.size()==0) System.out.println("Non ci sono eventi disponibili per questa categoria!");
+		else {
+			for(int i=0; i<disponibili.size(); i++) { 
+				System.out.println(disponibili.get(i).getNome() + " " + (i+1));
+				System.out.println(disponibili.get(i).getDescrizioneCampi());
+			}
 		}
-		
 	}
 	
 	public void scegliEvento(Vector<Categoria> disponibili) {
