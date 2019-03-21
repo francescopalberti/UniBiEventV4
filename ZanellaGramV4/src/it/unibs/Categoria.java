@@ -170,7 +170,7 @@ public class Categoria implements Serializable {
 	public boolean isRitirabile(Data dataOdierna){
 		Data termineIscrizioni = (Data)campiBase[TERMINE_ISCRIZIONI].getValore();
 		Data termineRitiroIscrizioni = (Data)campiBase[TERMINE_RITIRO_ISCRIZIONE].getValore();
-		if(termineRitiroIscrizioni==null)
+		if(termineRitiroIscrizioni.isEmpty())
 			return dataOdierna.isPrecedente(termineIscrizioni);
 		else return dataOdierna.isPrecedente(termineRitiroIscrizioni);
 	}

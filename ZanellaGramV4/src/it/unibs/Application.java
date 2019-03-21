@@ -293,8 +293,8 @@ public class Application {
 		int scelta= Utility.sceltaDaLista("Seleziona categoria (0 per tornare alla home)",categorie.length);
 		switch(scelta)
 		{
-			case 1: vediEventi(getEventiDisponibili(PartitaDiCalcio.class));
-					scegliEvento(getEventiDisponibili(PartitaDiCalcio.class));
+			case 1: if(vediEventi(getEventiDisponibili(PartitaDiCalcio.class)))
+						scegliEvento(getEventiDisponibili(PartitaDiCalcio.class));
 				break;
 			case 0: return;
 		}
@@ -317,14 +317,18 @@ public class Application {
 		return disponibili;
 	}
 	
-	public void vediEventi(Vector<Categoria> disponibili)
+	public boolean vediEventi(Vector<Categoria> disponibili)
 	{
-		if(disponibili.size()==0) System.out.println("Non ci sono eventi disponibili per questa categoria!");
+		if(disponibili.size()==0) {
+			System.out.println("Non ci sono eventi disponibili per questa categoria!");
+			return false;
+		}
 		else {
 			for(int i=0; i<disponibili.size(); i++) { 
 				System.out.println(disponibili.get(i).getNome() + " " + (i+1));
 				System.out.println(disponibili.get(i).getDescrizioneCampi());
 			}
+			return true;
 		}
 	}
 	

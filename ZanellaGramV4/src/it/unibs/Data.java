@@ -80,6 +80,8 @@ public Data(Integer gg, Integer mm, Integer yy) {
 		return true;
 	}
 	
-	
+	public boolean isEmpty(){
+		return giorno==null || mese==null || anno==null;
+	}
 	
 }
