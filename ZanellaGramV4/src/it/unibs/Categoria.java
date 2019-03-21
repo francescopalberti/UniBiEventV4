@@ -50,6 +50,13 @@ public class Categoria implements Serializable {
 		creatore=_creatore;
 	}
 
+	/**
+	 * @return the listaPartecipanti
+	 */
+	public Vector<SpazioPersonale> getListaPartecipanti() {
+		return listaPartecipanti;
+	}
+
 	public String getNome() {
 		return nome;
 	}

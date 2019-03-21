@@ -8,8 +8,8 @@ import java.util.Vector;
 
 public class Application {
 	
-	public static String pathProfili = "C:\\Users\\franc\\git\\ZanellaGramV4\\ZanellaGramV4\\data\\profili.dat";
-	public static String pathPartite = "C:\\Users\\franc\\git\\ZanellaGramV4\\ZanellaGramV4\\data\\partite.dat";
+	public static String pathProfili = "data\\profili.dat";
+	public static String pathPartite = "data\\partite.dat";
 	
 	private static final int NUMERO_CAMPI=16;
 	
@@ -32,6 +32,7 @@ public class Application {
 	private static final int GENERE=14;
 	private static final int FASCIA_DI_ETA=15;
 	
+	
 	private String[] categorie = {"Partita di calcio"};
 	private Data dataOdierna;
 	private Ora oraAttuale;
@@ -41,8 +42,9 @@ public class Application {
 	private Vector<PartitaDiCalcio> listaPartite;
 	private Vector<SpazioPersonale> profili;
 	private String[] vociMain = {"Esci e salva","Vedi eventi", "Crea evento", "Vedi profilo"};
-	private String[] vociSpazioPersonale = {"Esci","Vedi eventi che ho creato","Vedi eventi a cui sono iscritto","Vedi notifiche"};
+	private String[] vociSpazioPersonale = {"Esci","Vedi eventi che ho creato","Vedi eventi a cui sono iscritto","Vedi notifiche","Gestisci inviti"};
 	private String[] vociLogin = {"Accedi","Registrati"};
+	private static final String[] vociGestioneInviti = {"Esci","Invita tutti", "Seleziona profili"};
 	
 	private Campo[] campi;
 	
@@ -338,7 +340,7 @@ public class Application {
 	private void visualizzaSpazioPersonale() {
 		boolean fine=false;
 		do {
-			int i = Utility.scegli("SPAZIO PERSONALE DI --> "+mioProfilo.getNomignolo(),vociSpazioPersonale,"Seleziona una voce",4);
+			int i = Utility.scegli("SPAZIO PERSONALE DI --> "+mioProfilo.getNomignolo(),vociSpazioPersonale,"Seleziona una voce",5);
 			switch(i) {
 				case 0:fine=true;
 					break;
@@ -354,6 +356,10 @@ public class Application {
 					gestioneNotifiche();
 					fine=true;
 					break;
+				case 4:
+					gestioneInviti();
+					fine=true;
+					break;
 				default: System.out.println("Scelta non valida!");
 					break;
 			
@@ -361,6 +367,8 @@ public class Application {
 		}while(!fine);
 	}
 		
+	
+
 	private void gestioneEventiCreati() {
 		int a;
 		do {
@@ -419,6 +427,60 @@ public class Application {
 		}
 	}
 	
+	private void gestioneInviti() {
+		int a;
+		do {
+			if(mioProfilo.hasEventiCreati()) { 
+				mioProfilo.stampaEventiCreati();
+				a = Utility.sceltaDaLista("Seleziona l'evento per cui vuoi invitare (0 per uscire)", mioProfilo.getEventiCreati().size());
+				if(a==0) return;
+				else { 
+					
+					Categoria eventoSelezionato = mioProfilo.getEventiCreati().get(a-1);
+					String categoria = eventoSelezionato.getNome();
+					Vector<SpazioPersonale> listaExPartecipanti = mioProfilo.getListaExPartecipanti(categoria);
+						if(listaExPartecipanti.size()!=0) {
+						boolean fine=false;
+						do {
+							int i = Utility.scegli("GESTIONE INVITI",vociGestioneInviti,"Scegli quale operazione effettuare",3);
+							switch(i) {
+								case 0:fine=true;
+									break;
+								case 1:
+									for (SpazioPersonale profilo : listaExPartecipanti) {
+										profilo.addNotifica("Sei invitato a: " + eventoSelezionato);
+									}
+									fine=true;
+									break;
+								case 2:
+								int s;
+								mioProfilo.stampaExPartecipanti(categoria);
+								do {
+										s = Utility.sceltaDaLista("Seleziona il profilo che vuoi invitare (0 per uscire):", listaExPartecipanti.size());
+										if(s==0) return;
+										else{
+											listaExPartecipanti.get(s-1).addNotifica("Sei invitato a: " + eventoSelezionato); 
+										}
+									}while(s!=0);
+									fine=true;
+									break;
+								default: System.out.println("Scelta non valida!");
+									break;
+								}
+						}while(!fine);
+					}else System.out.println("Non ci sono ex partecipanti a tale categoria!");
+				}
+			}else {
+				System.out.println("Non hai creato nessun evento!");
+				a=0;
+			}
+		}while(a!=0);
+	}
+
+	
+	
+
+
 	private void partecipaEvento(Categoria evento) {
 		evento.aggiungiPartecipante(mioProfilo);
 		mioProfilo.addEventoPrenotato(evento);

@@ -1,6 +1,7 @@
 package it.unibs;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Vector;
 
 public class SpazioPersonale implements Serializable {
@@ -157,5 +158,24 @@ public class SpazioPersonale implements Serializable {
 		for(Categoria c2: eventiCreati)
 			if(evento.toString().equals(c2.toString())) return true;
 		return false;
+	}
+	
+	public Vector<SpazioPersonale> getListaExPartecipanti(String categoria){
+		Vector<SpazioPersonale> listaExPartecipanti = new Vector<SpazioPersonale>();
+		for (Categoria eventoCreato : eventiCreati) {
+			if(eventoCreato.getNome().equals(categoria)) listaExPartecipanti.addAll(eventoCreato.getListaPartecipanti());
+		} 
+		return listaExPartecipanti;
+		
+	}
+	
+	public void stampaExPartecipanti(String categoria) {
+		Vector<SpazioPersonale> listaExPartecipanti = getListaExPartecipanti(categoria);
+		System.out.println("Ex Partecipanti :");
+		int i=0;
+		for (SpazioPersonale spazioPersonale : listaExPartecipanti) {
+			System.out.println(i+1 + ") " + spazioPersonale.getNomignolo());
+			i++;
+		}
 	}
 }
