@@ -93,12 +93,20 @@ public class Categoria implements Serializable {
 
 	private void controlloChiusura(Data dataOdierna) {
 		Integer numeroPartecipanti=(Integer)campiBase[NUMERO_PARTECIPANTI].getValore();
-		Integer tolleranza=(Integer)campiBase[TOLLERANZA_PARTECIPANTI].getValore();
+		Integer tolleranza;
+		Integer temp=(Integer)campiBase[TOLLERANZA_PARTECIPANTI].getValore();
+		if(temp==null)
+			tolleranza= new Integer(0);
+		else tolleranza=temp;
 		Data dataScadenza = (Data) campiBase[TERMINE_ISCRIZIONI].getValore();
 		boolean scaduto=dataScadenza.isPrecedente(dataOdierna);
 		boolean condizione1=partecipantiAttuali>=numeroPartecipanti &&  partecipantiAttuali<=numeroPartecipanti+tolleranza && scaduto;
 		Data dataRitiro = (Data) campiBase[TERMINE_RITIRO_ISCRIZIONE].getValore();
-		boolean ritirabile = dataRitiro.isPrecedente(dataOdierna);
+		boolean ritirabile;
+		if(dataRitiro==null)
+			ritirabile=true;
+		else ritirabile = dataRitiro.isPrecedente(dataOdierna);
+		
 		boolean condizione2= !scaduto && ritirabile && (partecipantiAttuali==numeroPartecipanti+tolleranza);
 		
 		if (condizione1 || condizione2) {
@@ -169,7 +177,12 @@ public class Categoria implements Serializable {
 	
 	public boolean isRitirabile(Data dataOdierna){
 		Data termineIscrizioni = (Data)campiBase[TERMINE_ISCRIZIONI].getValore();
-		Data termineRitiroIscrizioni = (Data)campiBase[TERMINE_RITIRO_ISCRIZIONE].getValore();
+		Data temp=(Data)campiBase[TERMINE_RITIRO_ISCRIZIONE].getValore();
+		Data termineRitiroIscrizioni;
+		if(temp==null)
+			return true;
+		else termineRitiroIscrizioni = temp;
+		
 		if(termineRitiroIscrizioni.isEmpty())
 			return dataOdierna.isPrecedente(termineIscrizioni);
 		else return dataOdierna.isPrecedente(termineRitiroIscrizioni);

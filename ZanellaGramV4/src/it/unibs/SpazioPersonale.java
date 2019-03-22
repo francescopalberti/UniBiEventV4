@@ -28,6 +28,10 @@ public class SpazioPersonale implements Serializable {
 		categoriePreferite.add(preferita);
 	}
 	
+	public void deletePreferiti() {
+		categoriePreferite.clear();
+	}
+	
 	public Vector<String> getCategoriePreferite() {
 		return categoriePreferite;
 	}

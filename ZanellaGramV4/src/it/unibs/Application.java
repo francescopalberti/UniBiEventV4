@@ -8,8 +8,8 @@ import java.util.Vector;
 
 public class Application {
 	
-	public static String pathProfili = "data\\profili.dat";
-	public static String pathPartite = "data\\partite.dat";
+	public static String pathProfili = "C:\\\\Users\\\\zenry\\\\git\\\\ZanellaGramV4\\\\ZanellaGramV4\\\\data\\\\profili.dat";
+	public static String pathPartite = "C:\\\\Users\\\\zenry\\\\git\\\\ZanellaGramV4\\\\ZanellaGramV4\\\\data\\\\partite.dat";
 	
 	private static final int NUMERO_CAMPI=16;
 	
@@ -42,7 +42,7 @@ public class Application {
 	private Vector<PartitaDiCalcio> listaPartite;
 	private Vector<SpazioPersonale> profili;
 	private String[] vociMain = {"Esci e salva","Vedi eventi", "Crea evento", "Vedi profilo"};
-	private String[] vociSpazioPersonale = {"Esci","Vedi eventi che ho creato","Vedi eventi a cui sono iscritto","Vedi notifiche","Gestisci inviti"};
+	private String[] vociSpazioPersonale = {"Esci","Vedi eventi che ho creato","Vedi eventi a cui sono iscritto","Vedi notifiche","Modifica dati personali","Gestisci inviti"};
 	private String[] vociLogin = {"Accedi","Registrati"};
 	private static final String[] vociGestioneInviti = {"Esci","Invita tutti", "Seleziona profili"};
 	
@@ -105,8 +105,7 @@ public class Application {
 		}
 	}
 	
-	public boolean accedi() {
-	
+	public boolean accedi() {	
 		String nick=Utility.leggiStringa("Inserisci il nomignolo per accedere ");
 		for(SpazioPersonale p:profili)
 			if(p.getNomignolo().equals(nick)) {
@@ -146,6 +145,7 @@ public class Application {
 	public void infoAggiuntive() {
 	   FasciaDiEta fascia = new FasciaDiEta(Utility.leggiIntero("\nEtà min"), Utility.leggiIntero("Età max"));
 	   mioProfilo.setEta(fascia);
+	   mioProfilo.deletePreferiti();
 	   stampaCategorie();
 	   boolean fine;
 	   int scelta;
@@ -215,8 +215,13 @@ public class Application {
 					   campi[i].setValore(Utility.leggiStringa(""));
 				      break;
 				   case FASCIA_DI_ETA:
-					   FasciaDiEta fascia = new FasciaDiEta(Utility.leggiIntero("\nEtà min"), Utility.leggiIntero("Età max"));
-					   campi[i].setValore(fascia);
+					   Integer min=Utility.leggiIntero("\nEtà min");
+					   Integer max=Utility.leggiIntero("Età max");
+					   if(!(min==null && max==null)) {
+						   FasciaDiEta fascia = new FasciaDiEta(min, max);
+						   campi[i].setValore(fascia);		   
+					   }
+
 					      break;
 				}
 			}
@@ -253,24 +258,43 @@ public class Application {
 			   case TERMINE_RITIRO_ISCRIZIONE:
 				   Boolean formatoDataErrato=false;
 				   Data date;
+				   Integer gg, mm, aa;
 				   do {
-				   date = new Data(Utility.leggiIntero("\nGiorno"), Utility.leggiIntero("Mese"), Utility.leggiIntero("Anno"));
-				   formatoDataErrato=!date.controlloData();
-				   if (formatoDataErrato) System.out.println("Hai inserito una data nel formato errato!");
+					   gg=Utility.leggiIntero("\nGiorno");
+					   mm=Utility.leggiIntero("Mese");
+					   aa=Utility.leggiIntero("Anno");
+					   if(gg==null && mm==null && aa==null) {
+						   date=null;
+						   formatoDataErrato=false;
+					   }
+					   else {
+						   date = new Data(gg, mm, aa);
+						   formatoDataErrato=!date.controlloData();
+						   if (formatoDataErrato) System.out.println("Hai inserito una data nel formato errato!");
+						   else campi[i].setValore(date); 
+					   }
 				   } while(formatoDataErrato);
-				   campi[i].setValore(date);
 				      break;
 			   case ORA:
 			   case DURATA:
 			   case ORA_CONCLUSIVA:
 				   Boolean formatoOraErrato=false;
 				   Ora orario;
+				   Integer ora,min;
 				   do {
-					   orario = new Ora(Utility.leggiIntero("\nOra"), Utility.leggiIntero("Minuti"));
-					   formatoOraErrato=!orario.controlloOra();
-				   if (formatoOraErrato) System.out.println("Hai inserito un orario nel formato errato!");
+					   ora=Utility.leggiIntero("\nOra");
+					   min=Utility.leggiIntero("Minuti");
+					   if(ora==null && min==null) {
+						   orario=null;
+						   formatoDataErrato=false;
+					   }
+					   else {
+						   orario = new Ora(ora, min);
+						   formatoOraErrato=!orario.controlloOra();
+						   if (formatoOraErrato) System.out.println("Hai inserito un orario nel formato errato!");
+						   else campi[i].setValore(orario);
+					   }
 				   } while(formatoOraErrato);
-				   campi[i].setValore(orario);
 				      break;
 			}
 		}
@@ -280,7 +304,7 @@ public class Application {
 	public Boolean controlloCompilazione(Campo [] campi) {
 		for (int i = 0; i < NUMERO_CAMPI; i++) {
 			if(campi[i].isObbligatorio()) {
-				if(campi[i].getValore()==null || campi[i].getValore()=="") return false;
+				if(campi[i].getValore()==null) return false;
 			}
 		}
 		return true;
@@ -345,7 +369,7 @@ public class Application {
 	private void visualizzaSpazioPersonale() {
 		boolean fine=false;
 		do {
-			int i = Utility.scegli("SPAZIO PERSONALE DI --> "+mioProfilo.getNomignolo(),vociSpazioPersonale,"Seleziona una voce",5);
+			int i = Utility.scegli("SPAZIO PERSONALE DI --> "+mioProfilo.getNomignolo(),vociSpazioPersonale,"Seleziona una voce",6);
 			switch(i) {
 				case 0:fine=true;
 					break;
@@ -361,7 +385,11 @@ public class Application {
 					gestioneNotifiche();
 					fine=true;
 					break;
-				case 4:
+				case 4: 
+					infoAggiuntive();
+					fine=true;
+					break;
+				case 5:
 					gestioneInviti();
 					fine=true;
 					break;
