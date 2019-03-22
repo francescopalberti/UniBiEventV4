@@ -102,9 +102,9 @@ public class Categoria implements Serializable {
 		boolean scaduto=dataScadenza.isPrecedente(dataOdierna);
 		boolean condizione1=partecipantiAttuali>=numeroPartecipanti &&  partecipantiAttuali<=numeroPartecipanti+tolleranza && scaduto;
 		Data dataRitiro = (Data) campiBase[TERMINE_RITIRO_ISCRIZIONE].getValore();
-		boolean ritirabile;
-		if(dataRitiro==null)
-			ritirabile=true;
+		boolean ritirabile = false;
+		if(dataRitiro==null) 
+			dataRitiro=(Data) campiBase[TERMINE_ISCRIZIONI].getValore();
 		else ritirabile = dataRitiro.isPrecedente(dataOdierna);
 		
 		boolean condizione2= !scaduto && ritirabile && (partecipantiAttuali==numeroPartecipanti+tolleranza);
