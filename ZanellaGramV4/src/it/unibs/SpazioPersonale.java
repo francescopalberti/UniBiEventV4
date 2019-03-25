@@ -182,4 +182,13 @@ public class SpazioPersonale implements Serializable {
 			i++;
 		}
 	}
+	
+	public void notificaInteressamento(String categoria) {
+		for (String categoriaPreferita : categoriePreferite) {
+			if (categoria.equalsIgnoreCase(categoriaPreferita)) {
+				notifiche.add("E' stato creato un nuovo evento consigliato!");
+			}
+		}
+		
+	}
 }

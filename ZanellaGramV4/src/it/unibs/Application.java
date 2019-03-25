@@ -229,6 +229,7 @@ public class Application {
 				PartitaDiCalcio unaPartita = new PartitaDiCalcio(Arrays.copyOfRange(campi, 0, 14), Arrays.copyOfRange(campi, 14, 16),mioProfilo);
 				listaPartite.add(unaPartita);
 				mioProfilo.addEventoCreato(unaPartita);
+				notificaInteressati("Partita di calcio"); //da correggere
 			} else {
 				System.out.println("Non hai compilato alcuni campi obbligatori");
 			}
@@ -308,6 +309,13 @@ public class Application {
 			}
 		}
 		return true;
+		
+	}
+	
+	private void notificaInteressati(String categoria) {
+		for (SpazioPersonale profilo : profili) {
+			profilo.notificaInteressamento(categoria);
+		}
 		
 	}
 
