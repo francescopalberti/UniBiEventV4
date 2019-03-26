@@ -8,8 +8,8 @@ import java.util.Vector;
 
 public class Application {
 	
-	public static String pathProfili = "C:\\\\Users\\\\zenry\\\\git\\\\ZanellaGramV4\\\\ZanellaGramV4\\\\data\\\\profili.dat";
-	public static String pathPartite = "C:\\\\Users\\\\zenry\\\\git\\\\ZanellaGramV4\\\\ZanellaGramV4\\\\data\\\\partite.dat";
+	public static String pathProfili = "ZanellaGramV4\\data\\profili.dat";
+	public static String pathPartite = "ZanellaGramV4\\data\\partite.dat";
 	
 	private static final int NUMERO_CAMPI=16;
 	
@@ -287,7 +287,7 @@ public class Application {
 					   min=Utility.leggiIntero("Minuti");
 					   if(ora==null && min==null) {
 						   orario=null;
-						   formatoDataErrato=false;
+						   formatoOraErrato=false;
 					   }
 					   else {
 						   orario = new Ora(ora, min);
@@ -314,7 +314,7 @@ public class Application {
 	
 	private void notificaInteressati(String categoria) {
 		for (SpazioPersonale profilo : profili) {
-			profilo.notificaInteressamento(categoria);
+			if(profilo!=mioProfilo) profilo.notificaInteressamento(categoria);
 		}
 		
 	}
@@ -358,7 +358,7 @@ public class Application {
 		else {
 			for(int i=0; i<disponibili.size(); i++) { 
 				System.out.println(disponibili.get(i).getNome() + " " + (i+1));
-				System.out.println(disponibili.get(i).getDescrizioneCampi());
+				System.out.println(disponibili.get(i).getCampiCompilati());
 			}
 			return true;
 		}

@@ -121,16 +121,16 @@ public class SpazioPersonale implements Serializable {
 	public void stampaEventiPrenotati() {
 		System.out.println("EVENTI A CUI SONO ISCRITTO:");
 		for(int i=0; i< eventiPrenotati.size(); i++) { 
-			System.out.println(eventiPrenotati.get(i).getNome() + (i+1));
-			System.out.println(eventiPrenotati.get(i).getDescrizioneCampi());
+			System.out.println(eventiPrenotati.get(i).getNome() + " " + (i+1));
+			System.out.println(eventiPrenotati.get(i).getCampiCompilati());
 		}
 	}
 	
 	public void stampaEventiCreati() {
 		System.out.println("EVENTI CHE HO CREATO:");
 		for(int i=0; i< eventiCreati.size(); i++) { 
-			System.out.println(eventiCreati.get(i).getNome() + (i+1));
-			System.out.println(eventiCreati.get(i).getDescrizioneCampi());
+			System.out.println(eventiCreati.get(i).getNome() + " " + (i+1));
+			System.out.println(eventiCreati.get(i).getCampiCompilati());
 		}
 	}
 
@@ -158,9 +158,9 @@ public class SpazioPersonale implements Serializable {
 
 	public boolean isPartecipante(Categoria evento) {
 		for(Categoria c1: eventiPrenotati)
-			if(evento.toString().equals(c1.toString())) return true;
+			if(evento.getCampiCompilati().equals(c1.getCampiCompilati())) return true;
 		for(Categoria c2: eventiCreati)
-			if(evento.toString().equals(c2.toString())) return true;
+			if(evento.getCampiCompilati().equals(c2.getCampiCompilati())) return true;
 		return false;
 	}
 	
@@ -184,9 +184,10 @@ public class SpazioPersonale implements Serializable {
 	}
 	
 	public void notificaInteressamento(String categoria) {
+		
 		for (String categoriaPreferita : categoriePreferite) {
 			if (categoria.equalsIgnoreCase(categoriaPreferita)) {
-				notifiche.add("E' stato creato un nuovo evento consigliato!");
+				notifiche.add("E' stato creato un nuovo evento consigliato per la categoria "+categoria+"\n");
 			}
 		}
 		

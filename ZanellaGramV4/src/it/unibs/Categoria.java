@@ -195,7 +195,7 @@ public class Categoria implements Serializable {
 		}
 	}
 	
-	public String getDescrizioneCampi() {
+	public String getCampiCompilati() {
 		StringBuffer s = new StringBuffer();
 		for(int i=0; i < campiBase.length; i++) { 
 			s.append("   " + campiBase[i].toStringValore());

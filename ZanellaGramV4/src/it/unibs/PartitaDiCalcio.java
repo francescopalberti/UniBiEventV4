@@ -23,10 +23,10 @@ public class PartitaDiCalcio extends Categoria implements Serializable{
 	}
 	
 	
-	public String getDescrizioneCampi()
+	public String getCampiCompilati()
 	{
 		StringBuffer s = new StringBuffer();
-		s.append(super.getDescrizioneCampi());
+		s.append(super.getCampiCompilati());
 		for(int j=0; j<campiSpecifici.length; j++) {
 			s.append("   " + campiSpecifici[j].toStringValore());
 			s.append(lineSeparator);
