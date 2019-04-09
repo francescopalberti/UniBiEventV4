@@ -6,13 +6,7 @@ import java.util.Date;
 import java.util.Vector;
 
 
-public class Application {
-	
-	public static String pathProfili = "ZanellaGramV4\\data\\profili.dat";
-	public static String pathPartite = "ZanellaGramV4\\data\\partite.dat";
-	
-	private static final int NUMERO_CAMPI=16;
-	
+public class Application implements Serializable {
 	private static final int TITOLO=0;
 	private static final int NUMERO_PARTECIPANTI=1;
 	private static final int TERMINE_ISCRIZIONI=2;
@@ -48,42 +42,41 @@ public class Application {
 	
 	private Campo[] campi;
 	
-	public Application(Data dataOdierna, Ora oraAttuale) throws ClassNotFoundException, IOException {
+	public Application() throws ClassNotFoundException, IOException {
 		initObjects();
-		this.dataOdierna=dataOdierna;
-		this.oraAttuale=oraAttuale;
 	}
 	
 
 	@SuppressWarnings("unchecked")
 	private void initObjects() throws ClassNotFoundException, IOException {
-		campi = new Campo[NUMERO_CAMPI];
-		assegnaPartitaDiCalcio(campi);
-		
-		//caricamento oggetti
-		if(new File(pathProfili).exists())profili=(Vector<SpazioPersonale>)caricaOggetto(pathProfili, SpazioPersonale.class);
-		else profili = new Vector<SpazioPersonale>();
-		
-		if(new File(pathPartite).exists())listaPartite=(Vector<PartitaDiCalcio>)caricaOggetto(pathPartite, PartitaDiCalcio.class);
-		else listaPartite = new Vector<PartitaDiCalcio>();
+		profili = new Vector<SpazioPersonale>();
+		listaPartite = new Vector<PartitaDiCalcio>();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Object caricaOggetto(String path, Class c) throws ClassNotFoundException, IOException
-	{
-		FileInputStream in = new FileInputStream(new File(path));
-		ObjectInputStream objectIn=new ObjectInputStream(in);
-		Object result=new Object();
-		
-		if(c==PartitaDiCalcio.class) {
-			result = (Vector<Categoria>) objectIn.readObject();
-			objectIn.close();
+	public void runApplication(Data dataOdierna, Ora oraAttuale) throws IOException {
+		this.dataOdierna=dataOdierna;
+		this.oraAttuale=oraAttuale;
+		log();
+		controlloEventi();
+		boolean fine=false;
+		while(!fine)
+		{	
+			System.out.println("\nUniBiEvent V4.0");
+			int i = Utility.scegli(titoloMain,vociMain,"Seleziona una voce",4);
+			switch(i) {
+				case 0:fine=true;
+					break;
+				case 1:vediCategorie();
+					break;
+				case 2:creaEvento();
+					break;
+				case 3: visualizzaSpazioPersonale();
+					break;
+				default: System.out.println("Scelta non valida!");
+					break;
+				
+			}
 		}
-		else if(c==SpazioPersonale.class){
-			result = (Vector<SpazioPersonale>) objectIn.readObject();
-			objectIn.close();
-		}
-		return result;
 	}
 	
 	public void log() {
@@ -121,7 +114,7 @@ public class Application {
 		boolean fine=false;
 		do {
 			String nick=Utility.leggiStringa("Nomignolo*");
-			if(nick=="") System.out.println("Il nomignolo è obbligatorio!");
+			if(nick==null) System.out.println("Il nomignolo è obbligatorio!");
 			else {
 				if(controlloNomignolo(nick)) {
 					mioProfilo=new SpazioPersonale(nick);
@@ -143,52 +136,42 @@ public class Application {
 	}
 	
 	public void infoAggiuntive() {
-	   FasciaDiEta fascia = new FasciaDiEta(Utility.leggiIntero("\nEtà min"), Utility.leggiIntero("Età max"));
-	   mioProfilo.setEta(fascia);
-	   mioProfilo.deletePreferiti();
-	   stampaCategorie();
-	   boolean fine;
-	   int scelta;
-	   do {
-		   scelta = Utility.leggiIntero("Seleziona categoria d'interesse (0 per terminare)");
-		   if(scelta>categorie.length) System.out.println("Scelta non valida!!");
-		   else if (scelta==0) return;
-		   else {
-				   String preferita = categorie[scelta-1];
-				   mioProfilo.addCategoriaPreferita(preferita);
-		   		}
-	   }while(scelta!=0);
+		System.out.println("Inserisci la tua fascia di età:");
+		   FasciaDiEta fascia = new FasciaDiEta(Utility.leggiInteroOpzionale("\nEtà min"), Utility.leggiInteroOpzionale("Età max"));
+		   mioProfilo.setEta(fascia);
+		   mioProfilo.deletePreferiti();
+		   Vector<String> daStampare=new Vector<String>();
+		   for(String el: categorie){
+			   daStampare.add(el);
+		   }
+		   boolean fine=false;
+		   int scelta;
+		   do {
+			   //stampaCategorie();
+			   if(daStampare.size()>0){
+				   Utility.stampaVettoreNumerato(daStampare);
+			   scelta = Utility.leggiIntero("Seleziona categoria d'interesse (0 per terminare)");
+			   if(scelta>daStampare.size()) System.out.println("Scelta non valida!!");
+			   else if (scelta==0) return;
+			   else {
+				   		String preferita = daStampare.get(scelta-1);
+					   mioProfilo.addCategoriaPreferita(preferita);
+					   daStampare.remove(scelta-1);
+			   		}
+			   } else {
+				   System.out.println("Categorie disponibili esaurite.");
+				   fine=true;
+			   }
+			   
+		   }while(!fine);
 	}
 	
-	public void runApplication() throws IOException {
-		log();
-		controlloEventi();
-		boolean fine=false;
-		while(!fine)
-		{	
-			int i = Utility.scegli(titoloMain,vociMain,"Seleziona una voce",4);
-			switch(i) {
-				case 0: {fine=true;
-					esciEsalva();}
-					break;
-				case 1:vediCategorie();
-					break;
-				case 2:creaEvento();
-					break;
-				case 3: visualizzaSpazioPersonale();
-					break;
-				default: System.out.println("Scelta non valida!");
-					break;
-				
-			}
-		}
-	}
+	
 
 
 	private void controlloEventi() {
-		for (Categoria evento : listaPartite) {
-			if(evento.aggiornaStato(dataOdierna)) listaPartite.remove(evento);
-		}
+		for (Categoria evento : listaPartite) 
+			evento.aggiornaStato(dataOdierna);
 	}
 
 	private void creaEvento() {
@@ -215,14 +198,13 @@ public class Application {
 					   campi[i].setValore(Utility.leggiStringa(""));
 				      break;
 				   case FASCIA_DI_ETA:
-					   Integer min=Utility.leggiIntero("\nEtà min");
-					   Integer max=Utility.leggiIntero("Età max");
+					   Integer min=Utility.leggiInteroOpzionale("\nEtà min");
+					   Integer max=Utility.leggiInteroOpzionale("Età max");
 					   if(!(min==null && max==null)) {
 						   FasciaDiEta fascia = new FasciaDiEta(min, max);
 						   campi[i].setValore(fascia);		   
 					   }
-
-					      break;
+				      break;
 				}
 			}
 			if(controlloCompilazione(campi)){
@@ -245,7 +227,7 @@ public class Application {
 			   case NUMERO_PARTECIPANTI:
 			   case QUOTA:
 			   case TOLLERANZA_PARTECIPANTI:
-			      campi[i].setValore(Utility.leggiIntero(""));
+			      campi[i].setValore(Utility.leggiInteroOpzionale(""));
 			      break;
 			   case TITOLO:
 			   case LUOGO:
@@ -258,23 +240,40 @@ public class Application {
 			   case DATA_CONCLUSIVA:
 			   case TERMINE_RITIRO_ISCRIZIONE:
 				   Boolean formatoDataErrato=false;
+				   Boolean incoerenzaData=false;
 				   Data date;
 				   Integer gg, mm, aa;
 				   do {
-					   gg=Utility.leggiIntero("\nGiorno");
-					   mm=Utility.leggiIntero("Mese");
-					   aa=Utility.leggiIntero("Anno");
+					   gg=Utility.leggiInteroOpzionale("\nGiorno");
+					   mm=Utility.leggiInteroOpzionale("Mese");
+					   aa=Utility.leggiInteroOpzionale("Anno");
 					   if(gg==null && mm==null && aa==null) {
 						   date=null;
 						   formatoDataErrato=false;
+						   incoerenzaData=false;
 					   }
 					   else {
 						   date = new Data(gg, mm, aa);
 						   formatoDataErrato=!date.controlloData();
-						   if (formatoDataErrato) System.out.println("Hai inserito una data nel formato errato!");
-						   else campi[i].setValore(date); 
+						   if (formatoDataErrato) System.out.println("Hai inserito una data nel formato errato!"); 
+						   else if(date.isPrecedente(dataOdierna)) {
+								   incoerenzaData=true; 
+								   System.out.println("Hai inserito una data già passata!"); 
+						   }else if(i==TERMINE_RITIRO_ISCRIZIONE){
+							   Data termineIscrizioni=(Data)campi[TERMINE_ISCRIZIONI].getValore();
+							   if(termineIscrizioni==null) campi[i].setValore(date);
+							   else if(termineIscrizioni.isPrecedente(date)){
+								   System.out.println("Il termine ritiro iscrizione deve essere PRECEDENTE al termine iscrizioni!");
+								   incoerenzaData=true;
+							   } else {
+								   campi[i].setValore(date);
+								   incoerenzaData=false;
+							   }
+								   
+						   }
+						   else campi[i].setValore(date);
 					   }
-				   } while(formatoDataErrato);
+				   } while(formatoDataErrato || incoerenzaData);
 				      break;
 			   case ORA:
 			   case DURATA:
@@ -283,8 +282,8 @@ public class Application {
 				   Ora orario;
 				   Integer ora,min;
 				   do {
-					   ora=Utility.leggiIntero("\nOra");
-					   min=Utility.leggiIntero("Minuti");
+					   ora=Utility.leggiInteroOpzionale("\nOra");
+					   min=Utility.leggiInteroOpzionale("Minuti");
 					   if(ora==null && min==null) {
 						   orario=null;
 						   formatoOraErrato=false;
@@ -303,7 +302,7 @@ public class Application {
 	}
 	
 	public Boolean controlloCompilazione(Campo [] campi) {
-		for (int i = 0; i < NUMERO_CAMPI; i++) {
+		for (int i = 0; i < campi.length; i++) {
 			if(campi[i].isObbligatorio()) {
 				if(campi[i].getValore()==null) return false;
 			}
@@ -434,7 +433,7 @@ public class Application {
 	private void gestioneEventiPrenotati() {
 		int a;
 		do {
-			if(mioProfilo.hasEventiPrenotati()) { 
+			if(mioProfilo.hasEventiPrenotati()) {
 				mioProfilo.stampaEventiPrenotati();
 				a = Utility.sceltaDaLista("Seleziona evento a cui vuoi disiscriverti (0 per uscire):", mioProfilo.getEventiPrenotati().size());
 				if(a==0) return;
@@ -454,23 +453,25 @@ public class Application {
 
 	public void gestioneNotifiche() {
 		int a;
-		if(mioProfilo.noNotifiche()) {
-			System.out.println("NON hai notifiche da visualizzare");
-		}else {
-			mioProfilo.stampaNotifiche();
-			do {
+		Boolean fine=false;
+		do {
+			if(mioProfilo.noNotifiche()) {
+				System.out.println("NON hai notifiche da visualizzare");
+				fine=true;
+			}else {
+				mioProfilo.stampaNotifiche();
 				a = Utility.sceltaDaLista("Seleziona notifica che vuoi eliminare (0 per uscire):", mioProfilo.getNumeroNotifiche());
-				if(a==0) return;
+				if(a==0) fine=true;
 				else{
 					mioProfilo.deleteNotifica(a-1); 
 				}
-			}while(a!=0);
-		}
+			}
+		}while(!fine);
 	}
 	
 	private void gestioneInviti() {
 		int a;
-		do {
+		//do {
 			if(mioProfilo.hasEventiCreati()) { 
 				mioProfilo.stampaEventiCreati();
 				a = Utility.sceltaDaLista("Seleziona l'evento per cui vuoi invitare (0 per uscire)", mioProfilo.getEventiCreati().size());
@@ -489,23 +490,25 @@ public class Application {
 									break;
 								case 1:
 									for (SpazioPersonale profilo : listaExPartecipanti) {
-										profilo.addNotifica("Sei invitato a: " + eventoSelezionato);
+										profilo.addNotifica("Sei invitato da "+ mioProfilo.getNomignolo() +" all'evento: " + eventoSelezionato.getCampiBase()[TITOLO].getValore() + ",della categoria "+ eventoSelezionato.getNome());
 									}
+									System.out.println("Inviti inviati con successo.");
 									fine=true;
 									break;
 								case 2:
-								int s;
-								mioProfilo.stampaExPartecipanti(categoria);
-								do {
-										s = Utility.sceltaDaLista("Seleziona il profilo che vuoi invitare (0 per uscire):", listaExPartecipanti.size());
-										if(s==0) return;
-										else{
-											listaExPartecipanti.get(s-1).addNotifica("Sei invitato a: " + eventoSelezionato); 
-										}
-									}while(s!=0);
-									fine=true;
-									break;
-								default: System.out.println("Scelta non valida!");
+									int s;
+									mioProfilo.stampaExPartecipanti(categoria);
+									do {
+											s = Utility.sceltaDaLista("Seleziona il profilo che vuoi invitare (0 per uscire):", listaExPartecipanti.size());
+											if(s==0) return;
+											else{
+												listaExPartecipanti.get(s-1).addNotifica("Sei invitato da "+ mioProfilo.getNomignolo() +" all'evento: " + eventoSelezionato.getCampiBase()[TITOLO].getValore() + ",della categoria "+ eventoSelezionato.getNome());
+												System.out.println("Invito inviato con successo.");
+											}
+										}while(s!=0);
+										fine=true;
+										break;
+									default: System.out.println("Scelta non valida!");
 									break;
 								}
 						}while(!fine);
@@ -515,21 +518,17 @@ public class Application {
 				System.out.println("Non hai creato nessun evento!");
 				a=0;
 			}
-		}while(a!=0);
+		//}while(a!=0);
 	}
 
 	
-	
-
-
 	private void partecipaEvento(Categoria evento) {
 		evento.aggiungiPartecipante(mioProfilo);
 		mioProfilo.addEventoPrenotato(evento);
 		controlloEventi();
 	}
 	
-	
-	
+
 	public void assegnaEvento(Campo[] campi) 
 	{
 		campi[TITOLO]= new Campo<String>("Titolo","Titolo dell'evento",false);
@@ -554,19 +553,6 @@ public class Application {
 		campi[GENERE]=new Campo<String>("Genere","Indica il genere dei giocatori",true);
 		campi[FASCIA_DI_ETA]=new Campo<FasciaDiEta>("Fascia di età","Indica la fascia di età dei giocatori",true);
 		
-	}
-	
-	public void esciEsalva() throws IOException
-	{
-		System.out.println("Salvataggio...");
-		
-		ObjectOutputStream writerPartite=new ObjectOutputStream(new FileOutputStream(new File(pathPartite)));
-		writerPartite.writeObject(listaPartite);
-		writerPartite.close();
-		
-		ObjectOutputStream writerProfili=new ObjectOutputStream(new FileOutputStream(new File(pathProfili)));
-		writerProfili.writeObject(profili);
-		writerProfili.close();
 	}
 
 		
